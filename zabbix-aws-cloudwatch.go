@@ -76,16 +76,8 @@ func main() {
 		dimensions = append(dimensions, &dimension)
 	}
 
-	// Parsing dimensions list as JSON syntax from parameter :
-	// var dimensions []*cloudwatch.Dimension
-	// err := json.Unmarshal([]byte(*dimensionsJson), &dimensions)
-	// if err != nil {
-	// 	panic(err)
-	// }
-
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigDisable,
-		//Profile:           "testProfile",
 	}))
 	config := &aws.Config{
 		Region: aws.String(*region),
@@ -114,12 +106,13 @@ func main() {
 			aws.String(*stat),
 		}
 	} else {
-		if percentileMatch(*stat) {
+		switch percentileMatch(*stat) {
+		case true:
 			// If stat is an extende statistics (only support percentile)
 			parameters.ExtendedStatistics = []*string{
 				aws.String(*stat),
 			}
-		} else {
+		case false:
 			fmt.Println("Unknown Cloudwatch statistics provided as stat parameter, please check https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_concepts.html#Statistic")
 			os.Exit(4)
 		}
