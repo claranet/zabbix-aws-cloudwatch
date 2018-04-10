@@ -10,6 +10,7 @@ Build [zabbix-aws-cloudwatch.go](zabbix-aws-cloudwatch.go):
     $ export GOPATH=$(pwd)/go
     $ cd go/src/zabbix-aws-cloudwatch/
     $ go get
+    $ go test -v
     $ go build
 
 Or simply extract binary from [the bzip2 provided in this repo](https://bitbucket.org/morea/zabbix/downloads/zabbix-aws-cloudwatch.bz2):
@@ -75,7 +76,12 @@ Usage of ./zabbix-aws-cloudwatch:
 
 * Using assume-role slows down the program compared to no assume-role runtime.
 * The program returns 0 whenever either the metric value equals 0 OR the metric is not found (wrong namespace, dimension, metric..)
-* Whe you use multiple dimensions, you have to surround the second parameter of the item with double quote (you can do the same for all parameters as best practice)
+* When you use multiple dimensions, you have to surround the second parameter of the item with double quote (you can do the same for all parameters as best practice)
+* You can test new items creation with the provided [userparameter](../../../zabbix_agentd.d/aws.conf) using the following command :
+
+```
+zabbix_agentd -t 'aws.cloudwatch.metric["AWS/ELB","Name=LoadBalancerName,Value=ar-rps-api-ppd Name=AvailabilityZone,Value=eu-west-1a","HealthyHostCount","Minimum","300s","60","eu-west-1",0,]'
+```
 
 ## References
 
