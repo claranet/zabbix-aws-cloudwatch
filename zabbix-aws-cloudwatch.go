@@ -25,12 +25,17 @@ func stringInSlice(a string, list []string) bool {
 	return false
 }
 
-func percentileMatch(stat string) bool {
+// returns input if it matchs with regex or empty string if not
+func percentileMatch(stat string) string {
 	match, err := regexp.MatchString("p(\\d{1,2}(\\.\\d{0,2})?|100)", stat)
 	if err != nil {
 		panic(err)
 	}
-	return match
+	if !match {
+		return ""
+	}
+	return stat
+
 }
 
 func main() {
@@ -107,12 +112,12 @@ func main() {
 		}
 	} else {
 		switch percentileMatch(*stat) {
-		case true:
+		case *stat:
 			// If stat is an extende statistics (only support percentile)
 			parameters.ExtendedStatistics = []*string{
 				aws.String(*stat),
 			}
-		case false:
+		default:
 			fmt.Println("Unknown Cloudwatch statistics provided as stat parameter, please check https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_concepts.html#Statistic")
 			os.Exit(4)
 		}
@@ -141,16 +146,15 @@ func main() {
 			fmt.Println(*response.Datapoints[0].Minimum)
 		case "SampleCount":
 			fmt.Println(*response.Datapoints[0].SampleCount)
-		default:
-			if percentileMatch(*stat) {
-				// ExtendedStatistics
-				for _, value := range response.Datapoints[0].ExtendedStatistics {
-					fmt.Println(*value)
-				}
-			} else {
-				fmt.Println("Cloudwatch statistics seems to be an extendedStatistics but it seems to be an inconsistent percentile")
-				os.Exit(6)
+		case percentileMatch(*stat):
+			// ExtendedStatistics
+			for _, value := range response.Datapoints[0].ExtendedStatistics {
+				fmt.Println(*value)
 			}
+		default:
+			fmt.Println("Cloudwatch statistics seems to be an extendedStatistics but it seems to be an inconsistent percentile")
+			os.Exit(6)
+
 		}
 	} else {
 		//panic("metric not found, please check your parameters")
