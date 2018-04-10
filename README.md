@@ -37,7 +37,7 @@ Usage of ./zabbix-aws-cloudwatch:
   -namespace string
         AWS Cloudwatch namespace to target metric (mandatory)
   -no-data-value string
-        Value to returns when there is no data (mandatory)
+        Value to return when there is no data (mandatory)
   -period int
         AWS Cloudwatch metric period in seconds (optional) (default 60)
   -region string

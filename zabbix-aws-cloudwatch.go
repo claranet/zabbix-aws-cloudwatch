@@ -26,16 +26,11 @@ func stringInSlice(a string, list []string) bool {
 }
 
 // returns input if it matchs with regex or empty string if not
-func percentileMatch(stat string) string {
-	match, err := regexp.MatchString("p(\\d{1,2}(\\.\\d{0,2})?|100)", stat)
-	if err != nil {
-		panic(err)
-	}
-	if !match {
+func percentileMatch(stat string, regex *regexp.Regexp) string {
+	if !regex.MatchString(stat) {
 		return ""
 	}
 	return stat
-
 }
 
 func main() {
@@ -48,7 +43,7 @@ func main() {
 	period := flag.Int64("period", 60, "AWS Cloudwatch metric period in seconds (optional)")
 	durationString := flag.String("duration", "300s", "AWS Cloudwatch metric duration as string (optional)")
 	dimensionsShorthand := flag.String("dimensions", "", "AWS Cloudwatch dimensions list to filter in Shorthand syntax as for awscli (mandatory)")
-	noDataString := flag.String("no-data-value", "", "Value to returns when there is no data (mandatory)")
+	noDataString := flag.String("no-data-value", "", "Value to return when there is no data (mandatory)")
 
 	flag.Parse()
 	if *region == "" || *namespace == "" || *metric == "" || *stat == "" || *dimensionsShorthand == "" || *noDataString == "" {
@@ -104,6 +99,7 @@ func main() {
 	}
 
 	statisticsValues := []string{"SampleCount", "Average", "Sum", "Minimum", "Maximum"}
+	percentileRegex := regexp.MustCompile(`p(\d{1,2}(\.\d{0,2})?|100)`)
 
 	if stringInSlice(*stat, statisticsValues) {
 		// If stat is a simple statistics
@@ -111,7 +107,7 @@ func main() {
 			aws.String(*stat),
 		}
 	} else {
-		switch percentileMatch(*stat) {
+		switch percentileMatch(*stat, percentileRegex) {
 		case *stat:
 			// If stat is an extende statistics (only support percentile)
 			parameters.ExtendedStatistics = []*string{
@@ -146,7 +142,7 @@ func main() {
 			fmt.Println(*response.Datapoints[0].Minimum)
 		case "SampleCount":
 			fmt.Println(*response.Datapoints[0].SampleCount)
-		case percentileMatch(*stat):
+		case percentileMatch(*stat, percentileRegex):
 			// ExtendedStatistics
 			for _, value := range response.Datapoints[0].ExtendedStatistics {
 				fmt.Println(*value)
@@ -157,7 +153,6 @@ func main() {
 
 		}
 	} else {
-		//panic("metric not found, please check your parameters")
 		fmt.Println(noDataValue)
 	}
 }
