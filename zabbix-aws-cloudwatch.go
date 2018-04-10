@@ -40,8 +40,6 @@ func percentileMatch(stat string) string {
 
 func main() {
 
-	statisticsValues := []string{"SampleCount", "Average", "Sum", "Minimum", "Maximum"}
-
 	roleArn := flag.String("role-arn", "", "AWS role ARN to assume like arn:aws:iam::myaccountid:role/myrole (optional)")
 	region := flag.String("region", "", "AWS Cloudwatch region to query (mandatory)")
 	namespace := flag.String("namespace", "", "AWS Cloudwatch namespace of target metric (mandatory)")
@@ -104,6 +102,8 @@ func main() {
 		Period:     aws.Int64(*period),
 		Dimensions: dimensions,
 	}
+
+	statisticsValues := []string{"SampleCount", "Average", "Sum", "Minimum", "Maximum"}
 
 	if stringInSlice(*stat, statisticsValues) {
 		// If stat is a simple statistics
