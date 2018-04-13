@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -33,6 +34,25 @@ func percentileMatch(stat string, regex *regexp.Regexp) string {
 	return stat
 }
 
+// Parsing dimensions list as Shorthand syntax from parameter
+func parseDimensions(dimensionsArg string) ([]*cloudwatch.Dimension, error) {
+	var dimensions []*cloudwatch.Dimension
+	for _, dimensionsPair := range strings.Split(dimensionsArg, " ") {
+		var dimension cloudwatch.Dimension
+		for _, dimensionSingle := range strings.Split(dimensionsPair, ",") {
+			if strings.HasPrefix(dimensionSingle, "Name=") {
+				dimension.Name = &strings.Split(dimensionSingle, "=")[1]
+			} else if strings.HasPrefix(dimensionSingle, "Value=") {
+				dimension.Value = &strings.Split(dimensionSingle, "=")[1]
+			} else {
+				return nil, errors.New("Dimensions do not match with the cloudwatch shorthand format please check https://docs.aws.amazon.com/cli/latest/reference/cloudwatch/get-metric-statistics.html")
+			}
+		}
+		dimensions = append(dimensions, &dimension)
+	}
+	return dimensions, nil
+}
+
 func main() {
 
 	roleArn := flag.String("role-arn", "", "AWS role ARN to assume like arn:aws:iam::myaccountid:role/myrole (optional)")
@@ -58,21 +78,12 @@ func main() {
 	}
 
 	// Parsing dimensions list as Shorthand syntax from parameter :
-	var dimensions []*cloudwatch.Dimension
-	for _, dimensionsPair := range strings.Split(*dimensionsShorthand, " ") {
-		var dimension cloudwatch.Dimension
-		for _, dimensionSingle := range strings.Split(dimensionsPair, ",") {
-			if strings.HasPrefix(dimensionSingle, "Name=") {
-				dimension.Name = &strings.Split(dimensionSingle, "=")[1]
-			} else if strings.HasPrefix(dimensionSingle, "Value=") {
-				dimension.Value = &strings.Split(dimensionSingle, "=")[1]
-			} else {
-				fmt.Println("Dimensions do not match with the cloudwatch shorthand format please check https://docs.aws.amazon.com/cli/latest/reference/cloudwatch/get-metric-statistics.html")
-				os.Exit(5)
-			}
-		}
-		dimensions = append(dimensions, &dimension)
+	dimensions, err := parseDimensions(*dimensionsShorthand)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(5)
 	}
+	fmt.Println(dimensions)
 
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigDisable,
