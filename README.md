@@ -74,13 +74,17 @@ Usage of ./zabbix-aws-cloudwatch:
 
 ## Troubleshooting
 
+* When the "duration" and "period" parameters values choose involve cloudwatch API will return multiple points, so this program will always return only the last one.
+* This program uses a delay of 300s by default to retrieve data from cloudwatch because there is latency before a point is exposed with its final value but it could be decreased according to service refresh time.
+* The parameter "window" include both "duration" and "delay" parameters in one. It is useful for retro compatibility and allows to bypass the zabbix userparameters limit of 9 parameters.
 * Using assume-role slows down the program compared to no assume-role runtime.
 * The program returns 0 whenever either the metric value equals 0 OR the metric is not found (wrong namespace, dimension, metric..)
 * When you use multiple dimensions, you have to surround the second parameter of the item with double quote (you can do the same for all parameters as best practice)
-* You can test new items creation with the provided [userparameter](../../../zabbix_agentd.d/aws.conf) using the following command :
+* You can test new items creation with the provided [userparameter](../../../zabbix_agentd.d/aws.conf) using the following commands :
 
 ```
-zabbix_agentd -t 'aws.cloudwatch.metric["AWS/ELB","Name=LoadBalancerName,Value=ar-rps-api-ppd Name=AvailabilityZone,Value=eu-west-1a","HealthyHostCount","Minimum","300s","60","eu-west-1",0,]'
+zabbix_agentd -t 'aws.cloudwatch.metric["AWS/ELB","Name=LoadBalancerName,Value=elb-test Name=AvailabilityZone,Value=eu-west-1a","HealthyHostCount","Minimum","300s:300s","300","eu-west-1",0,]'
+zabbix_get -s 127.0.0.1 -k 'aws.cloudwatch.metric["AWS/ApplicationELB","Name=LoadBalancer,Value=app/alb-test/371554445f0edb42","RequestCount","Sum","60s:120s","60","eu-west-1",0]'
 ```
 
 ## References
