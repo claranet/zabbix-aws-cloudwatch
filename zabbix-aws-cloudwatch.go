@@ -131,8 +131,6 @@ func main() {
 		Period:     aws.Int64(*period),
 		Dimensions: dimensions,
 	}
-	fmt.Println(parameters)
-	os.Exit(0)
 
 	statisticsValues := []string{"SampleCount", "Average", "Sum", "Minimum", "Maximum"}
 	percentileRegex := regexp.MustCompile(`p(\d{1,2}(\.\d{0,2})?|100)`)
