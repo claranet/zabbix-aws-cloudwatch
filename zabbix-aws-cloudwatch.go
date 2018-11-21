@@ -54,6 +54,7 @@ func parseDimensions(dimensionsArg string) ([]*cloudwatch.Dimension, error) {
 }
 
 func main() {
+	const defaultDelay = "300s"
 
 	roleArn := flag.String("role-arn", "", "AWS role ARN to assume like arn:aws:iam::myaccountid:role/myrole (optional)")
 	region := flag.String("region", "", "AWS Cloudwatch region to query (mandatory)")
@@ -61,11 +62,11 @@ func main() {
 	metric := flag.String("metric", "", "AWS Cloudwatch metric name to collect (mandatory)")
 	stat := flag.String("stat", "", "AWS Cloudwatch metric statistic (mandatory)")
 	period := flag.Int64("period", 60, "AWS Cloudwatch metric period in seconds (optional)")
-	durationString := flag.String("duration", "300s", "AWS Cloudwatch metric duration as string. Ignored if \"window\" parameter is defined (optional)")
+	durationString := flag.String("duration", defaultDelay, "AWS Cloudwatch metric duration as string. Ignored if \"window\" parameter is defined (optional)")
 	dimensionsShorthand := flag.String("dimensions", "", "AWS Cloudwatch dimensions list to filter in Shorthand syntax as for awscli (mandatory)")
 	noDataString := flag.String("no-data-value", "", "Value to return when there is no data (mandatory)")
 	delayString := flag.String("delay", "300s", "AWS Cloudwatch metric delay as string. Ignored if \"window\" parameter is defined (optional)")
-	window := flag.String("window", "", "AWS Cloudwatch metric window in \"duration:delay\" format like \"300s:300s\" (optional)")
+	window := flag.String("window", "", "AWS Cloudwatch metric window in \"duration[:delay]\" format like \"300s:300s\" (optional)")
 
 	flag.Parse()
 	if *region == "" || *namespace == "" || *metric == "" || *stat == "" || *dimensionsShorthand == "" || *noDataString == "" {
@@ -89,7 +90,11 @@ func main() {
 	if *window != "" {
 		windowSlice := strings.Split(*window, ":")
 		*durationString = windowSlice[0]
-		*delayString = windowSlice[1]
+		if len(windowSlice) == 1 {
+			*delayString = defaultDelay
+		} else {
+			*delayString = windowSlice[1]
+		}
 	}
 
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
@@ -126,6 +131,8 @@ func main() {
 		Period:     aws.Int64(*period),
 		Dimensions: dimensions,
 	}
+	fmt.Println(parameters)
+	os.Exit(0)
 
 	statisticsValues := []string{"SampleCount", "Average", "Sum", "Minimum", "Maximum"}
 	percentileRegex := regexp.MustCompile(`p(\d{1,2}(\.\d{0,2})?|100)`)

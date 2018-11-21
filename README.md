@@ -28,15 +28,18 @@ To work, the instance where this program is run must have the policy `CloudWatch
 ## Usage
 
 ```
+$ ./zabbix-aws-cloudwatch --help
 Usage of ./zabbix-aws-cloudwatch:
+  -delay string
+        AWS Cloudwatch metric delay as string. Ignored if "window" parameter is defined (optional) (default "300s")
   -dimensions string
         AWS Cloudwatch dimensions list to filter in Shorthand syntax as for awscli (mandatory)
   -duration string
-        AWS Cloudwatch metric duration in string (optional) (default "300s")
+        AWS Cloudwatch metric duration as string. Ignored if "window" parameter is defined (optional) (default "300s")
   -metric string
         AWS Cloudwatch metric name to collect (mandatory)
   -namespace string
-        AWS Cloudwatch namespace to target metric (mandatory)
+        AWS Cloudwatch namespace of target metric (mandatory)
   -no-data-value string
         Value to return when there is no data (mandatory)
   -period int
@@ -47,6 +50,8 @@ Usage of ./zabbix-aws-cloudwatch:
         AWS role ARN to assume like arn:aws:iam::myaccountid:role/myrole (optional)
   -stat string
         AWS Cloudwatch metric statistic (mandatory)
+  -window string
+        AWS Cloudwatch metric window in "duration[:delay]" format like "300s:300s" (optional)
 ```
 
 ## Examples
@@ -76,7 +81,8 @@ Usage of ./zabbix-aws-cloudwatch:
 
 * When the "duration" and "period" parameters values choose involve cloudwatch API will return multiple points, so this program will always return only the last one.
 * This program uses a delay of 300s by default to retrieve data from cloudwatch because there is latency before a point is exposed with its final value but it could be decreased according to service refresh time.
-* The parameter "window" include both "duration" and "delay" parameters in one. It is useful for retro compatibility and allows to bypass the zabbix userparameters limit of 9 parameters.
+* The parameter "window" include both "duration" and "delay" parameters in one. It is useful to allow to bypass the zabbix userparameters limit of 9 parameters.
+* If parameter "window" has only one value instead of two ("300s" vs "300s:900s") default delay value (300s) will be used for retro compatibility.
 * Using assume-role slows down the program compared to no assume-role runtime.
 * The program returns 0 whenever either the metric value equals 0 OR the metric is not found (wrong namespace, dimension, metric..)
 * When you use multiple dimensions, you have to surround the second parameter of the item with double quote (you can do the same for all parameters as best practice)
