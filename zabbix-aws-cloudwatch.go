@@ -54,6 +54,7 @@ func parseDimensions(dimensionsArg string) ([]*cloudwatch.Dimension, error) {
 }
 
 func main() {
+	const defaultDelay = "300s"
 
 	roleArn := flag.String("role-arn", "", "AWS role ARN to assume like arn:aws:iam::myaccountid:role/myrole (optional)")
 	region := flag.String("region", "", "AWS Cloudwatch region to query (mandatory)")
@@ -61,9 +62,11 @@ func main() {
 	metric := flag.String("metric", "", "AWS Cloudwatch metric name to collect (mandatory)")
 	stat := flag.String("stat", "", "AWS Cloudwatch metric statistic (mandatory)")
 	period := flag.Int64("period", 60, "AWS Cloudwatch metric period in seconds (optional)")
-	durationString := flag.String("duration", "300s", "AWS Cloudwatch metric duration as string (optional)")
+	durationString := flag.String("duration", "60s", "AWS Cloudwatch metric duration as string. Ignored if \"window\" parameter is defined (optional)")
 	dimensionsShorthand := flag.String("dimensions", "", "AWS Cloudwatch dimensions list to filter in Shorthand syntax as for awscli (mandatory)")
 	noDataString := flag.String("no-data-value", "", "Value to return when there is no data (mandatory)")
+	delayString := flag.String("delay", defaultDelay, "AWS Cloudwatch metric delay as string. Ignored if \"window\" parameter is defined (optional)")
+	window := flag.String("window", "", "AWS Cloudwatch metric window in \"duration[:delay]\" format like \"60s:300s\" (optional)")
 
 	flag.Parse()
 	if *region == "" || *namespace == "" || *metric == "" || *stat == "" || *dimensionsShorthand == "" || *noDataString == "" {
@@ -83,7 +86,16 @@ func main() {
 		fmt.Println(err)
 		os.Exit(5)
 	}
-	fmt.Println(dimensions)
+
+	if *window != "" {
+		windowSlice := strings.Split(*window, ":")
+		*durationString = windowSlice[0]
+		if len(windowSlice) == 1 {
+			*delayString = defaultDelay
+		} else {
+			*delayString = windowSlice[1]
+		}
+	}
 
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigDisable,
@@ -97,12 +109,23 @@ func main() {
 		config.Credentials = creds
 	}
 
-	now := time.Now()
 	client := cloudwatch.New(sess, config)
-	duration, _ := time.ParseDuration(*durationString)
+
+	duration, err := time.ParseDuration(*durationString)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(6)
+	}
+	delay, err := time.ParseDuration(*delayString)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(6)
+	}
+	end := time.Now().Add(-delay)
+	start := end.Add(-duration)
 	parameters := &cloudwatch.GetMetricStatisticsInput{
-		StartTime:  aws.Time(now.Add(-duration)),
-		EndTime:    aws.Time(now),
+		StartTime:  aws.Time(start),
+		EndTime:    aws.Time(end),
 		MetricName: aws.String(*metric),
 		Namespace:  aws.String(*namespace),
 		Period:     aws.Int64(*period),
