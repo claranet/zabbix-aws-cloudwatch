@@ -79,7 +79,7 @@ Usage of ./zabbix-aws-cloudwatch:
 
 ## Troubleshooting
 
-* When the "duration" and "period" parameters values choose involve cloudwatch API will return multiple points, so this program will always return only the last one.
+* When the "duration" and "period" parameters values chosen involve the cloudwatch API to return multiple points, this program will always return only the last one.
 * This program uses a delay of 300s by default to retrieve data from cloudwatch because there is latency before a point is exposed with its final value but it could be decreased according to service refresh time.
 * The parameter "window" include both "duration" and "delay" parameters in one. It is useful to allow to bypass the zabbix userparameters limit of 9 parameters.
 * If parameter "window" has only one value instead of two ("300s" vs "300s:900s") default delay value (300s) will be used for retro compatibility.
