@@ -31,27 +31,27 @@ To work, the instance where this program is run must have the policy `CloudWatch
 $ ./zabbix-aws-cloudwatch --help
 Usage of ./zabbix-aws-cloudwatch:
   -delay string
-        AWS Cloudwatch metric delay as string. Ignored if "window" parameter is defined (optional) (default "300s")
+     AWS Cloudwatch metric delay as string. Ignored if "window" parameter is defined (optional) (default "300s")
   -dimensions string
-        AWS Cloudwatch dimensions list to filter in Shorthand syntax as for awscli (mandatory)
+     AWS Cloudwatch dimensions list to filter in Shorthand syntax as for awscli (mandatory)
   -duration string
-        AWS Cloudwatch metric duration as string. Ignored if "window" parameter is defined (optional) (default "300s")
+     AWS Cloudwatch metric duration as string. Ignored if "window" parameter is defined (optional) (default "60s")
   -metric string
-        AWS Cloudwatch metric name to collect (mandatory)
+     AWS Cloudwatch metric name to collect (mandatory)
   -namespace string
-        AWS Cloudwatch namespace of target metric (mandatory)
+     AWS Cloudwatch namespace of target metric (mandatory)
   -no-data-value string
-        Value to return when there is no data (mandatory)
+     Value to return when there is no data (mandatory)
   -period int
-        AWS Cloudwatch metric period in seconds (optional) (default 60)
+     AWS Cloudwatch metric period in seconds (optional) (default 60)
   -region string
-        AWS Cloudwatch region to query (mandatory)
+     AWS Cloudwatch region to query (mandatory)
   -role-arn string
-        AWS role ARN to assume like arn:aws:iam::myaccountid:role/myrole (optional)
+     AWS role ARN to assume like arn:aws:iam::myaccountid:role/myrole (optional)
   -stat string
-        AWS Cloudwatch metric statistic (mandatory)
+     AWS Cloudwatch metric statistic (mandatory)
   -window string
-        AWS Cloudwatch metric window in "duration[:delay]" format like "300s:300s" (optional)
+     AWS Cloudwatch metric window in "duration[:delay]" format like "60s:300s" (optional)
 ```
 
 ## Examples
