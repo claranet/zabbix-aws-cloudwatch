@@ -65,7 +65,7 @@ func main() {
 	durationString := flag.String("duration", defaultDelay, "AWS Cloudwatch metric duration as string. Ignored if \"window\" parameter is defined (optional)")
 	dimensionsShorthand := flag.String("dimensions", "", "AWS Cloudwatch dimensions list to filter in Shorthand syntax as for awscli (mandatory)")
 	noDataString := flag.String("no-data-value", "", "Value to return when there is no data (mandatory)")
-	delayString := flag.String("delay", "300s", "AWS Cloudwatch metric delay as string. Ignored if \"window\" parameter is defined (optional)")
+	delayString := flag.String("delay", defaultDelay, "AWS Cloudwatch metric delay as string. Ignored if \"window\" parameter is defined (optional)")
 	window := flag.String("window", "", "AWS Cloudwatch metric window in \"duration[:delay]\" format like \"300s:300s\" (optional)")
 
 	flag.Parse()
