@@ -1,0 +1,15 @@
+before:
+  hooks:
+#    - go mod download
+    - go mod tidy
+builds:
+  - env:
+      - CGO_ENABLED=0
+      - GO111MODULE=on
+    goos:
+      - linux
+archives:
+  - format: zip
+    files:
+      - LICENSE
+      - README.md
