@@ -3,23 +3,13 @@
 A generic program to get any metric from AWS Cloudwatch depending of provided parameters.
 This program handles AWS assume role to get metric from another account.
 
-## Build
-
-Build [zabbix-aws-cloudwatch.go](zabbix-aws-cloudwatch.go):
-
-    $ export GOPATH=$(pwd)/go
-    $ cd go/src/zabbix-aws-cloudwatch/
-    $ go get
-    $ go test -v
-    $ go build
-
-Or simply extract binary from [the bzip2 provided in this repo](https://bitbucket.org/morea/zabbix/downloads/zabbix-aws-cloudwatch.bz2):
-
-    $ bunzip2 zabbix-aws-cloudwatch.bz2
-
 ## Installation
 
-Simply copy the `zabbix-aws-cloudwatch` binary to the remote AWS instance from where you want to collect metrics.
+Retrieve the last binary version from [releases](https://github.com/claranet/zabbix-aws-cloudwatch/releases) or build it yourself using `go build`.
+
+Then, simply copy the `zabbix-aws-cloudwatch` binary to the remote AWS instance from where you want to collect metrics.
+
+__Note__ there is a [special version](https://github.com/claranet/zabbix-aws-cloudwatch/releases/tag/v1.0.0-go18) `v1.0.0-go18` compiled with go1.8.7 which offers better performance.
 
 ## AWS requirements
 
